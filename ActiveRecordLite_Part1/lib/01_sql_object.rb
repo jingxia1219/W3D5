@@ -1,3 +1,4 @@
+require 'byebug'
 require_relative 'db_connection'
 require 'active_support/inflector'
 # NB: the attr_accessor we wrote in phase 0 is NOT used in the rest
@@ -5,7 +6,19 @@ require 'active_support/inflector'
 
 class SQLObject
   def self.columns
-    
+    unless @arr
+      @arr = DBConnection.execute2(<<-SQL)
+        SELECT 
+          *
+        FROM 
+          -- #{@table_name}
+          #{self.table_name}
+       SQL
+       @arr = @arr.first
+       @arr.map! {|el| el.to_sym }
+     end
+     @arr
+     
   end
 
   def self.finalize!
